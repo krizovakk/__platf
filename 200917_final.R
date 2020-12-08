@@ -12,12 +12,8 @@ require(corrgram)
 
 rplatf <- read_excel("data/200416_platf_spad.xlsx") #rapeseed, 16th April 2020; platform+spad results; n=948
 rlab <-  read_excel("data/200416_lab.xls") #rapeseed, 16th April 2020; lab results; n=90
-wplatf <- read_excel("data/200618_platf_spad.xlsx") #wheat; 18th June 2020; platform+spad results; n=900
-wlab <- read_excel("data/200618_lab.xls") #wheat; 18th June 2020; lab results; n=90
 
 # final table -------------------------------------------------------------
-
-# rape
 
 rplatf <- rplatf %>% 
   mutate(spadeq = (99*rplatf$spad)/(144-rplatf$spad)) # SPAD value equation -> chlor. content
@@ -26,35 +22,16 @@ rplatfag <- aggregate(rplatf[, 1:39], list(rplatf$id), FUN = median) # 5:39 <-- 
 colnames(rplatfag)[1] <- "id"
 rmer <- merge(rplatfag, rlab, by = "id") # merged table for rapeseed, n=90
 rmer <- rmer %>% 
-  select(id, spad, spadeq, everything()) # moves the "spadeq" column to the front 
+  select(id, spad, spadeq, everything()) # moves the "spadeq" column to the front
 
-# wheat
-
-wplatf <- wplatf %>% 
-  mutate(spadeq = (99*wplatf$spad)/(144-wplatf$spad)) # SPAD value equation -> chlor. content
-wplatf$id <- paste(wplatf$var, wplatf$plant, sep = "")
-wplatfag <- aggregate(wplatf[, 1:38], list(wplatf$id), FUN = median)
-colnames(wplatfag)[1] <- "id"
-wmer <- merge(wplatfag, wlab, by = "id") # merged table for wheat, n=90
-wmer <- wmer %>% 
-  select(id, spad, spadeq, everything()) # moves the "spadeq" column to the front 
-
-
-# meaningfull colums ------------------------------------------------------
+# corrgram ------------------------------------------------------
 
 rcorm <- rmer %>%
   select(spad, spadeq, r, g, b, R, G, B, mean_rgb, cmin, cmax, c,
          hue, saturation, brightness, Y, Cb, Cr, GMR, GDR, VI, DGCI, NRI, NGI, ExG, ExG_n, kawa, yuzhu, adam, perez, geor, nas,
          cha, chb, chab, car, chacm, chbcm, chabcm, carcm)
 
-wcorm <- wmer %>%
-  select(spad, spadeq, r, g, b, R, G, B, mean_rgb, cmin, cmax, c,
-         hue, saturation, brightness, Y, Cb, Cr, GMR, GDR, VI, DGCI, NRI, NGI, ExG, ExG_n, kawa, yuzhu, adam, perez, geor, nas,
-         cha, chb, chab, car, chacm, chbcm, chabcm, carcm)
-
-
 corrgram(rcorm, lower.panel=panel.conf, upper.panel=NULL)
-corrgram(wcorm, lower.panel=panel.conf, upper.panel=NULL)
 
 
 # ggplots ------------------------------------------------------------------
@@ -75,7 +52,6 @@ corrgram(wcorm, lower.panel=panel.conf, upper.panel=NULL)
 #   stat_summary(fun.y = "mean", geom = "point", size = 3) 
 
 rmer$var <- factor(rmer$var)
-wmer$var <- factor(wmer$var)
 
 ggplot(rmer, aes(var, spad))+
   geom_boxplot()+
