@@ -198,3 +198,77 @@ library(writexl)
 
 # Write the first data set in a new workbook
 write_xlsx(rmer,"rmer.xlsx")
+
+
+# LED spectrum ------------------------------------------------------------
+
+led <- read_excel("data/led_spectrum.xlsx", sheet = 1)
+
+ptcol <- c("gray25", "gray70")
+
+# summary(led$diff)
+# plot(led$diff)
+# summary(led$nodiff)
+# plot(led$nodiff)
+
+ledl <- led %>% 
+  melt(id.vars = "nm", variable.name = "diff", value.name = "intens")
+
+ledl$diff <- factor(ledl$diff, 
+                    levels = c("diff", "nodiff"), 
+                    labels = c("diffuser", "clear"))
+
+ggplot(ledl, aes(nm, intens, color = diff))+
+  geom_point()+
+  xlab("Wavelength [nm]")+
+  ylab("EMR Intensity")+
+  ggtitle("LED Yoldal YZ-WS5N40N")+
+  scale_color_manual(values = ptcol)+
+  scale_x_continuous(limits = c(380, 820), 
+                     breaks = c(400, 450, 500, 550, 600, 650, 700, 750, 800))+
+  theme_minimal()+
+  theme(legend.title = element_blank())
+# ggsave("spec_both.png", path = "plots", height = 5, width = 8, dpi = 300)
+ggsave("spec_both_bw.png", path = "plots", height = 5, width = 8, dpi = 300)
+
+# rescale
+
+led_sc <- led %>%
+  mutate(diff = diff + 3.01) %>% 
+  mutate(nodiff = nodiff + 3.68) %>% 
+  mutate(nodiff = nodiff * 1.3838) %>% 
+  melt(id.vars = "nm", variable.name = "diff", value.name = "intens")
+
+# summary(led_sc$diff)  
+# summary(led_sc$nodiff)  
+  
+led_sc$diff <- factor(led_sc$diff, 
+                    levels = c("diff", "nodiff"), 
+                    labels = c("diffuser", "clear"))
+
+ggplot(led_sc, aes(nm, intens, color = diff))+
+  geom_point()+
+  xlab("Wavelength [nm]")+
+  ylab("EMR Intensity")+
+  ggtitle("LED Yoldal YZ-WS5N40N")+
+  scale_color_manual(values = ptcol)+
+  scale_x_continuous(limits = c(380, 820), 
+                     breaks = c(400, 450, 500, 550, 600, 650, 700, 750, 800))+
+  theme_minimal()+
+  theme(legend.title = element_blank())
+# ggsave("spec_both_rescaled.png", path = "plots", height = 5, width = 8, dpi = 300)
+ggsave("spec_both_rescaled_bw.png", path = "plots", height = 5, width = 8, dpi = 300)
+
+# one line only - WITH DIFFUSER
+
+ggplot(led, aes(nm, diff))+
+  geom_point()+
+  xlab("Wavelength [nm]")+
+  ylab("EMR Intensity [arb. u.]")+
+  ggtitle("LED Yoldal YZ-WS5N40N")+
+  scale_color_manual(values = "grey30")+
+  scale_x_continuous(limits = c(380, 820), 
+                     breaks = c(400, 450, 500, 550, 600, 650, 700, 750, 800))+
+  theme_minimal(base_size = 18)
+# ggsave("spec_both_rescaled.png", path = "plots", height = 5, width = 8, dpi = 300)
+ggsave("spec_diffuser_bw.png", path = "plots", height = 4, width = 6, dpi = 300)
