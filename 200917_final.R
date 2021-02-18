@@ -31,6 +31,30 @@ rmer <- rmer %>%
 rcorm_sel <- rmer %>% 
   select(spad, R, G, B, NRI, NGI, NBI, hue, saturation, brightness, Y, Cb, Cr, 
          GMR, GDR, GDB, RDB, VI, `(R-B)/(R+B)`, DGCI, ExG, ExR, `ExG-ExR`) #selected indices
+colnames(rcorm_sel)[1] <- "SPAD"
+
+# cor.test(rcorm_sel$spad, rcorm_sel$R)
+# cor.test(rcorm_sel$spad, rcorm_sel$G)
+# cor.test(rcorm_sel$spad, rcorm_sel$B)
+# cor.test(rcorm_sel$spad, rcorm_sel$NRI)
+# cor.test(rcorm_sel$spad, rcorm_sel$NGI)
+# cor.test(rcorm_sel$spad, rcorm_sel$NBI)
+# cor.test(rcorm_sel$spad, rcorm_sel$hue)
+# cor.test(rcorm_sel$spad, rcorm_sel$saturation)
+# cor.test(rcorm_sel$spad, rcorm_sel$brightness)
+# cor.test(rcorm_sel$spad, rcorm_sel$Y)
+# cor.test(rcorm_sel$spad, rcorm_sel$Cb)
+# cor.test(rcorm_sel$spad, rcorm_sel$Cr)
+# cor.test(rcorm_sel$spad, rcorm_sel$GMR)
+# cor.test(rcorm_sel$spad, rcorm_sel$GDR)
+# cor.test(rcorm_sel$spad, rcorm_sel$GDB)
+# cor.test(rcorm_sel$spad, rcorm_sel$RDB)
+# cor.test(rcorm_sel$spad, rcorm_sel$VI)
+# cor.test(rcorm_sel$spad, rcorm_sel$`(R-B)/(R+B)`)
+# cor.test(rcorm_sel$spad, rcorm_sel$DGCI)
+# cor.test(rcorm_sel$spad, rcorm_sel$ExG)
+# cor.test(rcorm_sel$spad, rcorm_sel$ExR)
+# cor.test(rcorm_sel$spad, rcorm_sel$`ExG-ExR`) # saved in /media/katerina/EXT_KK/TF/2019_IGA_Platformy_Hemisfery/PLATFORMA/200917_final/_wd/corr_coeficients.xlsx
 
 cm <- cor(rcorm_sel) # creates correlation matrix
 
@@ -38,46 +62,15 @@ res1 <- cor.mtest(rcorm_sel, conf.level = .95) # significance test, to add signi
 
 #install.packages("corrplot")
 require(corrplot)
-
-# corrplot(cm, p.mat = res1$p, method = "color" , type = "upper",
-#          sig.level = c(.001, .01, .05), pch.cex = .9,
-#          insig = "label_sig", pch.col = "white", order = "original") #funkcni
-
-corrplot(cm, p.mat = res1$p, method = "color" , type = "upper",
-         sig.level = c(.001, .01, .05), pch.cex = 1,
-         insig = "label_sig", pch.col = "white", order = "original", col = gray.colors(8), tl.col = "black")
-
-corrplot(cm, p.mat = res1$p, insig = "label_sig",
-         sig.level = c(.001, .01, .05), pch.cex = .7, pch.col = "white", type = "lower")
-
-
-corrplot(cm, p.mat = res1$p, method = "color",
-         insig = "label_sig", pch.col = "black", pch.cex = .9, type = "upper", col = gray.colors(4), tl.col = "black")
-
-
-#install.packages("GGally")
-require("GGally")
-
-ggcorr(rcorm_sel, method = c("everything", "pearson"))
-
-#install.packages("ellipse")
-require(ellipse)
 require(RColorBrewer)
 
-my_colors <- brewer.pal(5, "Spectral")
-my_colors <- colorRampPalette(my_colors)(100)
-
-ord <- order(rcorm_sel[1, ])
-data_ord <- rcorm_sel[ord, ord]
-plotcorr(data_ord , col=my_colors[data_ord*50+50] , mar=c(1,1,1,1)  )
-plotcorr(rcorm_sel , col=my_colors[rcorm_sel*50+50] , mar=c(1,1,1,1)  )
-
-# rcorm <- rmer %>%
-#   select(spad, spadeq, r, g, b, R, G, B, mean_rgb, cmin, cmax, c,
-#          hue, saturation, brightness, Y, Cb, Cr, GMR, GDR, VI, DGCI, NRI, NGI, ExG, ExG_n, kawa, yuzhu, adam, perez, geor, nas,
-#          cha, chb, chab, car, chacm, chbcm, chabcm, carcm)
-# 
-corrgram(cm, lower.panel=panel.conf, upper.panel=NULL)
+par(family="Times New Roman")
+corrplot(cm, p.mat = res1$p, method = "color" , type = "upper",
+         sig.level = c(.001, .01, .05), pch.cex = .8,
+         insig = "label_sig", pch.col = "white", order = "original", 
+         col = brewer.pal(n = 10, name = "PiYG"), 
+         tl.col = "black", tl.srt = 45)
+# saved as png via export, h 950 w 600
 
 # CORR siginificant -------------------------------------------------------
 
@@ -95,7 +88,8 @@ corrgram(cm_sig, lower.panel=panel.conf, upper.panel=NULL, cex.labels = 1.4, fon
 
 corrplot(cm_sig, p.mat = res1$p, method = "color" , type = "lower",
          sig.level = c(.001, .01, .05), pch.cex = 1,
-         insig = "label_sig", pch.col = "white", order = "original", col = gray.colors(8), tl.col = "black") #shades
+         insig = "label_sig", pch.col = "white", order = "original", 
+         col = gray.colors(8), tl.col = "black") #shades
 
 # ggplots ------------------------------------------------------------------
 
@@ -193,7 +187,7 @@ summary(mod)
 
 # EXPORT data -------------------------------------------------------------
 
-install.packages("writexl")
+# install.packages("writexl")
 library(writexl)
 
 # Write the first data set in a new workbook
@@ -237,7 +231,7 @@ led_sc <- led %>%
   mutate(diff = diff + 3.01) %>% 
   mutate(nodiff = nodiff + 3.68) %>% 
   mutate(nodiff = nodiff * 1.3838) %>% 
-  melt(id.vars = "nm", variable.name = "diff", value.name = "intens")
+  
 
 # summary(led_sc$diff)  
 # summary(led_sc$nodiff)  
@@ -261,14 +255,143 @@ ggsave("spec_both_rescaled_bw.png", path = "plots", height = 5, width = 8, dpi =
 
 # one line only - WITH DIFFUSER
 
-ggplot(led, aes(nm, diff))+
-  geom_point()+
+led_diff <- led_sc %>% 
+  filter(diff == "diffuser")
+
+ggplot(led_diff, aes(nm, intens))+
+  geom_point(size = .9)+
   xlab("Wavelength [nm]")+
   ylab("EMR Intensity [arb. u.]")+
   ggtitle("LED Yoldal YZ-WS5N40N")+
   scale_color_manual(values = "grey30")+
   scale_x_continuous(limits = c(380, 820), 
                      breaks = c(400, 450, 500, 550, 600, 650, 700, 750, 800))+
-  theme_minimal(base_size = 18)
+  theme_classic(base_size = 18)+
+  theme(text=element_text(family="Times New Roman"))
 # ggsave("spec_both_rescaled.png", path = "plots", height = 5, width = 8, dpi = 300)
 ggsave("spec_diffuser_bw.png", path = "plots", height = 4, width = 6, dpi = 300)
+
+# final SPAD estimate plot ------------------------------------------------
+
+spadestag <- rplatfag %>% 
+  mutate(lm = 89.538+0.475*rplatfag$Cb-0.761*rplatfag$Cr) %>% 
+  mutate(glm = 1/(-0.011-0.0003*rplatfag$Cb+0.005*rplatfag$Cr)) %>% 
+  select("var", "spad", "lm", "glm")
+melt(id.vars = "var", variable.name = "source", value.name = "value")
+
+# install.packages("ggpmisc")
+library(ggpmisc)
+# install.packages("ggtext")
+require(ggtext)
+
+labR <- paste("R^2 == 0.81")
+# lb1 <- paste("R^2 == ", round(runif(1),4))
+
+gslm <- ggplot(spadestag, aes(lm, spad))+
+  geom_point()+
+  labs(x = "SLM estimate", y = "SPAD value")+
+  annotate("text", x=37, y=54, family="Times New Roman",
+           label= "y = 89.538+0.475Cb-0.761Cr", size = 5)+
+  annotate("text", x=37, y=52, family="Times New Roman",
+           label= labR, size = 5, parse=TRUE)+
+  theme_classic(base_size = 18)+
+  theme(text=element_text(family="Times New Roman")) # face="bold"
+
+gslm
+
+gglm <- ggplot(spadestag, aes(glm, spad))+
+  geom_point()+
+  labs(x = "GLM estimate", y = "SPAD value")+
+  annotate("text", x=1.755, y=54, family="Times New Roman",
+           label= "y = 1/(-0.011-0.0003Cb+0.005Cr)", size = 5)+
+  annotate("text", x=1.755, y=52, family="Times New Roman",
+           label= labR, size = 5, parse=TRUE)+
+  theme_classic(base_size = 18)+
+  theme(text=element_text(family="Times New Roman")) # face="bold"
+
+gglm
+
+# install.packages("ggpubr")
+# require(ggpubr)
+
+ggarrange(gslm, gglm + rremove("y.title"), # https://rdrr.io/cran/ggpubr/man/rremove.html
+          # labels = c("A", "B"),
+          # label.x = 0.2,
+          ncol = 2, nrow = 1)
+
+ggsave("SPAD_estimate.png", path = "plots", height = 5, width = 10, dpi = 300)
+
+# estimboth <- spadestag %>% 
+#   melt(id.vars = c("var", "spad"), variable.name = "model", value.name = "value")
+# 
+# ggplot(estimboth, aes(value, spad, shape = model))+
+#   geom_point()+
+#   labs(x = "SPAD value estimate", y = "SPAD value")+
+#   theme_classic(base_size = 20)
+
+#ppt plots
+
+spadestag$var <- factor(spadestag$var)
+
+ggplot(spadestag, aes(var, spad))+
+  geom_boxplot()+
+  labs(x = "treatment", y = "SPAD value")+
+  theme_classic(base_size = 25)
+ggsave("R_spad_var.png", path = "plots", height = 5, width = 13, dpi = 300)
+
+ggplot(spadestag, aes(var, lm))+
+  geom_boxplot()+
+  labs(x = "treatment", y = "SPAD value estimate")+
+  theme_classic(base_size = 25)
+ggsave("R_spad_estimate_var.png", path = "plots", height = 5, width = 13, dpi = 300)
+
+# final boxplot SPAD vs R2S
+
+spadestagl <- spadestag %>% 
+  melt(id.vars = c("var"), variable.name = "device", value.name = "value")
+spadestagl$var <- factor(spadestagl$var)
+
+# attempt for color transparency
+
+t_col <- function(color, percent = 50, name = name) {
+     #   color = color name
+     # percent = % transparency
+     #    name = an optional name for the color
+  
+  ## Get RGB values for named color
+  rgb.val <- col2rgb(color)
+  
+  ## Make new color using input color as base and alpha set by transparency
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+  
+  ## Save the color
+  invisible(t.col)
+}
+
+mycol1<- t_col("deeppink3", perc = 50, name = "lt.pink")
+mycol2 <- t_col("forestgreen", perc = 50, name = "lt.green")
+
+ggplot(spadestagl, aes(var, value, fill = device))+
+  geom_boxplot()+
+  labs(x = "Treatment", y = "SPAD value", fill = "")+
+  # scale_fill_manual(values = c("#228B227F", "#CD10767F"), # transparent version
+  scale_fill_manual(values = c("springgreen4", "mediumvioletred"), 
+                    name = "", labels = c("SPAD-502Plus", "Rasp2SPAD LM"))+
+  theme_classic(base_size = 18)+
+  theme(legend.position = "bottom",
+        text=element_text(family="Times New Roman"))
+# ggsave("SPAD_R2S_boxplot.png", path = "plots", height = 5, width = 7, dpi = 300)
+# ggsave("SPAD_R2S_boxplot_legend_bottom.png", path = "plots", height = 5, width = 9, dpi = 300)
+
+# indices stats ------------------------------------------------------
+
+rstat <- read_excel("data/200416_rapeseed_rgb_stat.xlsx")
+
+install.packages("psych")
+require(psych)
+
+stattab <- describeBy(rstat, rstat$var) #works absolutely perfect :)
+write_xlsx(stattab,"stattab.xlsx")
